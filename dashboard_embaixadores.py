@@ -19,7 +19,7 @@ st.set_page_config(
 def load_data(path: str = "embaixadores_resumo.csv") -> pd.DataFrame:
     df = pd.read_csv(path)
 
-    # Padronizar nomes de colunas esperadas
+    # Mapear nomes de colunas que podem vir diferentes
     col_map = {
         "Nome": "Nome",
         "Telefone": "Telefone",
@@ -32,15 +32,72 @@ def load_data(path: str = "embaixadores_resumo.csv") -> pd.DataFrame:
         "Taxa de conversão dos indicados (%)": "Taxa conversão (%)",
         "Taxa conversão (%)": "Taxa conversão (%)",
         "Data da Ultima Indicação": "Data última indicação",
+        "Data Ultima indicacao": "Data última indicação",
         "Data última indicação": "Data última indicação",
         "Soma do Benefício": "Soma Benefício",
-        "Soma Benefício": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Benefício ": "Soma Benefício",
+        "Soma do Beneficio ": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Benefício": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
+        "Soma do Beneficio": "Soma Benefício",
     }
 
-    # Renomear colunas que existirem
+    # renomear o que bater com o map
     df = df.rename(columns={c: col_map.get(c, c) for c in df.columns})
 
-    # Garantir que as principais colunas existam
+    # garantir colunas principais
     for c in [
         "Nome",
         "Telefone",
@@ -53,32 +110,35 @@ def load_data(path: str = "embaixadores_resumo.csv") -> pd.DataFrame:
         if c not in df.columns:
             df[c] = None
 
-    # Conversões numéricas
+    # numéricas
     num_cols = ["Leads indicados (total)", "Leads fechados", "Soma Benefício"]
     for c in num_cols:
         df[c] = pd.to_numeric(df[c], errors="coerce")
 
-    # Datas
+    # datas
     df["Data última indicação"] = pd.to_datetime(
         df["Data última indicação"], errors="coerce"
     )
 
-    # --------------------------
-    # Cálculo de KPIs
-    # --------------------------
-    # Taxa de conversão (%)
-    df["Taxa conversão (%)"] = (df["Leads fechados"] / df["Leads indicados (total)"]) * 100
+    # ---------------- KPIs ----------------
+
+    # Taxa de conversão
+    df["Taxa conversão (%)"] = (
+        df["Leads fechados"] / df["Leads indicados (total)"]
+    ) * 100
     df.loc[df["Leads indicados (total)"] == 0, "Taxa conversão (%)"] = None
 
     # Valor médio por indicação
-    df["Valor médio por indicação"] = df["Soma Benefício"] / df["Leads indicados (total)"]
+    df["Valor médio por indicação"] = (
+        df["Soma Benefício"] / df["Leads indicados (total)"]
+    )
     df.loc[df["Leads indicados (total)"] == 0, "Valor médio por indicação"] = None
 
     # Dias desde a última indicação
     today = pd.to_datetime(datetime.now().date())
     df["Dias desde última indicação"] = (today - df["Data última indicação"]).dt.days
 
-    # Ativo / Inativo nos últimos 90 dias
+    # Status 90 dias
     def status_90(dias):
         if pd.isna(dias):
             return "Sem indicações"
@@ -86,16 +146,14 @@ def load_data(path: str = "embaixadores_resumo.csv") -> pd.DataFrame:
 
     df["Status 90 dias"] = df["Dias desde última indicação"].apply(status_90)
 
-    # ROI (opcional) – só calcula se tiver coluna 'Receita Gerada'
+    # ROI – só se existir coluna de receita
     if "Receita Gerada" in df.columns:
         df["Receita Gerada"] = pd.to_numeric(df["Receita Gerada"], errors="coerce")
         df["ROI"] = df["Receita Gerada"] / df["Soma Benefício"]
     else:
         df["ROI"] = None
 
-    # Velocidade de indicação (média de leads por dia desde a última indicação)
-    # Isso é um proxy, pois não temos a data da primeira indicação.
-    # Interpretação: quantos leads/dia em média, considerando o período até a última indicação.
+    # Velocidade de indicação (leads/dia)
     df["Velocidade indicação (leads/dia)"] = df.apply(
         lambda row: row["Leads indicados (total)"] / row["Dias desde última indicação"]
         if pd.notna(row["Dias desde última indicação"])
@@ -104,30 +162,25 @@ def load_data(path: str = "embaixadores_resumo.csv") -> pd.DataFrame:
         axis=1,
     )
 
-    # --------------------------
-    # Score e Ranking
-    # --------------------------
+    # Score e Rank
     df["Leads indicados (total)"].fillna(0, inplace=True)
     df["Leads fechados"].fillna(0, inplace=True)
     df["Soma Benefício"].fillna(0, inplace=True)
     df["Taxa conversão (%)"].fillna(0, inplace=True)
 
-    # Normalização simples para benefício
     max_beneficio = df["Soma Benefício"].max()
-    if max_beneficio and max_beneficio > 0:
-        beneficio_norm = df["Soma Benefício"] / max_beneficio
-    else:
+    if pd.isna(max_beneficio) or max_beneficio <= 0:
         beneficio_norm = 0
+    else:
+        beneficio_norm = df["Soma Benefício"] / max_beneficio
 
-    # Score simples: peso maior para leads fechados, depois benefício e conversão
     df["Score"] = (
         df["Leads fechados"] * 3
         + df["Leads indicados (total)"] * 1
         + beneficio_norm * 2
-        + (df["Taxa conversão (%)"] / 25)  # conversão também conta
+        + (df["Taxa conversão (%)"] / 25)
     )
 
-    # Ordenar por Score e gerar ranking
     df = df.sort_values("Score", ascending=False).reset_index(drop=True)
     df["Rank"] = df.index + 1
 
@@ -137,27 +190,29 @@ def load_data(path: str = "embaixadores_resumo.csv") -> pd.DataFrame:
 df = load_data()
 
 # ------------------------------
-# Barra lateral – Filtros
+# Filtros - Sidebar
 # ------------------------------
 st.sidebar.header("🔍 Filtros")
 
-# Filtro por Status 90 dias
 status_options = ["Todos"] + sorted(df["Status 90 dias"].dropna().unique().tolist())
 selected_status = st.sidebar.selectbox("Status nos últimos 90 dias", status_options)
 
-# Filtro por mínimo de leads indicados
-max_leads = int(df["Leads indicados (total)"].max() or 0)
-min_leads = st.sidebar.slider(
-    "Mínimo de leads indicados",
-    min_value=0,
-    max_value=max_leads if max_leads > 0 else 0,
-    value=0,
-)
+# slider só se tiver algum lead
+max_leads_raw = df["Leads indicados (total)"].max()
+if pd.isna(max_leads_raw) or max_leads_raw <= 0:
+    st.sidebar.write("Nenhum lead indicado registrado ainda.")
+    min_leads = 0
+else:
+    max_leads = int(max_leads_raw)
+    min_leads = st.sidebar.slider(
+        "Mínimo de leads indicados",
+        min_value=0,
+        max_value=max_leads,
+        value=0,
+    )
 
-# Filtro por nome (busca simples)
 nome_busca = st.sidebar.text_input("Buscar embaixador por nome")
 
-# Aplicar filtros
 filtered_df = df.copy()
 
 if selected_status != "Todos":
@@ -184,9 +239,7 @@ st.markdown(
 total_embaixadores = df["Nome"].nunique()
 total_leads = int(df["Leads indicados (total)"].sum())
 total_fechados = int(df["Leads fechados"].sum())
-taxa_media_conv = (
-    (total_fechados / total_leads) * 100 if total_leads > 0 else 0
-)
+taxa_media_conv = (total_fechados / total_leads * 100) if total_leads > 0 else 0
 total_beneficio = df["Soma Benefício"].sum()
 
 col1, col2, col3, col4 = st.columns(4)
@@ -196,7 +249,10 @@ col3.metric("Leads fechados (total)", total_fechados)
 col4.metric("Taxa média de conversão (%)", f"{taxa_media_conv:.1f}")
 
 col5, col6 = st.columns(2)
-col5.metric("Benefício total pago (R$)", f"{total_beneficio:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+col5.metric(
+    "Benefício total pago (R$)",
+    f"{total_beneficio:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."),
+)
 
 ativos_90 = (df["Status 90 dias"] == "Ativo (≤90d)").sum()
 col6.metric("Embaixadores ativos (≤90 dias)", int(ativos_90))
@@ -204,11 +260,10 @@ col6.metric("Embaixadores ativos (≤90 dias)", int(ativos_90))
 st.markdown("---")
 
 # ------------------------------
-# Ranking de Embaixadores
+# Ranking
 # ------------------------------
 st.subheader("🏆 Ranking de Embaixadores (por Score)")
 
-# Mostrar apenas algumas colunas importantes no ranking
 cols_rank = [
     "Rank",
     "Nome",
@@ -220,7 +275,6 @@ cols_rank = [
     "Status 90 dias",
 ]
 ranking_df = filtered_df[cols_rank].copy()
-
 st.dataframe(ranking_df, use_container_width=True)
 
 # ------------------------------
@@ -229,46 +283,52 @@ st.dataframe(ranking_df, use_container_width=True)
 st.markdown("### 📈 Visualizações")
 
 # Top 10 por benefício
-top_beneficio = filtered_df.nlargest(10, "Soma Benefício")
-fig_beneficio = px.bar(
-    top_beneficio,
-    x="Nome",
-    y="Soma Benefício",
-    title="Top 10 Embaixadores por Benefício Recebido",
-    text_auto=".2s",
-)
-fig_beneficio.update_layout(xaxis_title="Embaixador", yaxis_title="Benefício (R$)")
-st.plotly_chart(fig_beneficio, use_container_width=True)
-
-# Top 10 por taxa de conversão (min. 3 leads para evitar distorção)
-df_conv = filtered_df[filtered_df["Leads indicados (total)"] >= 3].copy()
-df_conv = df_conv.sort_values("Taxa conversão (%)", ascending=False).head(10)
-if not df_conv.empty:
-    fig_conv = px.bar(
-        df_conv,
+if not filtered_df.empty:
+    top_beneficio = filtered_df.nlargest(10, "Soma Benefício")
+    fig_beneficio = px.bar(
+        top_beneficio,
         x="Nome",
-        y="Taxa conversão (%)",
-        title="Top 10 por Taxa de Conversão (mín. 3 leads)",
-        text_auto=".1f",
+        y="Soma Benefício",
+        title="Top 10 Embaixadores por Benefício Recebido",
+        text_auto=".2s",
     )
-    fig_conv.update_layout(
-        xaxis_title="Embaixador", yaxis_title="Taxa de conversão (%)"
+    fig_beneficio.update_layout(
+        xaxis_title="Embaixador",
+        yaxis_title="Benefício (R$)",
     )
-    st.plotly_chart(fig_conv, use_container_width=True)
+    st.plotly_chart(fig_beneficio, use_container_width=True)
 
-# Distribuição de status 90 dias
-st.markdown("### ⏱ Status nos últimos 90 dias")
-status_counts = filtered_df["Status 90 dias"].value_counts().reset_index()
-status_counts.columns = ["Status 90 dias", "Quantidade"]
+    # Top 10 por taxa de conversão (mín. 3 leads)
+    df_conv = filtered_df[filtered_df["Leads indicados (total)"] >= 3].copy()
+    df_conv = df_conv.sort_values("Taxa conversão (%)", ascending=False).head(10)
+    if not df_conv.empty:
+        fig_conv = px.bar(
+            df_conv,
+            x="Nome",
+            y="Taxa conversão (%)",
+            title="Top 10 por Taxa de Conversão (mín. 3 leads)",
+            text_auto=".1f",
+        )
+        fig_conv.update_layout(
+            xaxis_title="Embaixador",
+            yaxis_title="Taxa de conversão (%)",
+        )
+        st.plotly_chart(fig_conv, use_container_width=True)
 
-fig_status = px.pie(
-    status_counts,
-    values="Quantidade",
-    names="Status 90 dias",
-    title="Distribuição de Atividade (90 dias)",
-    hole=0.4,
-)
-st.plotly_chart(fig_status, use_container_width=True)
+    # Pizza status 90 dias
+    st.markdown("### ⏱ Status nos últimos 90 dias")
+    status_counts = filtered_df["Status 90 dias"].value_counts().reset_index()
+    status_counts.columns = ["Status 90 dias", "Quantidade"]
+    fig_status = px.pie(
+        status_counts,
+        values="Quantidade",
+        names="Status 90 dias",
+        title="Distribuição de Atividade (90 dias)",
+        hole=0.4,
+    )
+    st.plotly_chart(fig_status, use_container_width=True)
+else:
+    st.info("Nenhum embaixador atende aos filtros selecionados no momento.")
 
 # ------------------------------
 # Tabela detalhada
